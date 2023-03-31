@@ -11,8 +11,6 @@
 
 #include "glsl.hpp"
 #include "IBL.h"
-#include "objloader.h"
-#include "Object.h"
 #include "Model.h"
 #include "shader.h"
 #include "camera.h"
@@ -27,12 +25,11 @@ using namespace std;
 const int WIDTH = 1200, HEIGHT = 900;
 int window=0;
 
-const char* fragshader_name = "../../shaders/fragpbr.frag";
-const char* vertexshader_name = "../../shaders/vertprb.vert";
+const char* fragshader_name = "shaders/fragpbr.frag";
+const char* vertexshader_name = "shaders/vertprb.vert";
 
-unsigned const int DELTA_TIME = 10;
+unsigned const int DELTA_TIME =10;
 
-vector<Object> objects = vector<Object>();
 vector<Model> models = vector<Model>();
 vector<Shader> shaders = vector<Shader>();
 
@@ -227,7 +224,7 @@ int main(int argc, char** argv)
   shaders[0].setInt("brdfLUT", 2);
   shaders[0].setInt("albedoMap", 3);
 
-  models.push_back(Model("../../OBJs/lotus49/lotus49.gltf"));
+  models.push_back(Model("OBJs/lotus49/lotus49.gltf"));
 
   maps = initIBL();
   // Main loop

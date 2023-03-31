@@ -50,24 +50,17 @@ CPMAddPackage(
 # Saves the files for this project to two variables
 set(SOURCE_FILES
         src/main.cpp
-        src/my_class.cpp
         src/glsl.cpp
-        src/objloader.cpp
-        src/texture.cpp
-        src/Object.cpp
         )
 
 set(HEADER_FILES
-        include/my_class.hpp
         include/glsl.hpp
-        include/objloader.h
-        include/texture.h
-        include/Object.h
         include/shader.h
         include/Mesh.h
         include/Model.h
         include/camera.h
         include/stb_image.h
+        include/IBL.h
         )
 
 # Create an executable called `Simple_OpenGL` with the files we declared earlier
@@ -103,6 +96,10 @@ target_link_libraries(${PROJECT_NAME}
         glew_s
         assimp
         )
+
+# Copy resources to build folder
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/OBJs DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
 # Checks and enabled link time optimisation if it's available for your generator and compiler.
 include(CheckIPOSupported)

@@ -24,10 +24,10 @@ struct Maps{
 
 Maps initIBL(){
 
-  Shader equirectangularToCubemapShader = Shader("../../shaders/vertcubemap.vert", "../../shaders/fragrectangular_to_cube.frag");
-  Shader irradianceShader = Shader("../../shaders/vertcubemap.vert", "../../shaders/fragirradicance_conv.frag");
-  Shader prefilterShader = Shader("../../shaders/vertcubemap.vert", "../../shaders/fragprefilter.frag");
-  Shader brdfShader = Shader("../../shaders/vertbrdf.vert", "../../shaders/fragbrdf.frag");
+  Shader equirectangularToCubemapShader = Shader("shaders/vertcubemap.vert", "shaders/fragrectangular_to_cube.frag");
+  Shader irradianceShader = Shader("shaders/vertcubemap.vert", "shaders/fragirradicance_conv.frag");
+  Shader prefilterShader = Shader("shaders/vertcubemap.vert", "shaders/fragprefilter.frag");
+  Shader brdfShader = Shader("shaders/vertbrdf.vert", "shaders/fragbrdf.frag");
   // pbr: setup framebuffer
   // ----------------------
   unsigned int captureFBO;
@@ -44,8 +44,8 @@ Maps initIBL(){
   // ---------------------------------
   stbi_set_flip_vertically_on_load(true);
   int width, height, nrComponents;
-  float *data = stbi_loadf("../../OBJs/cayley_interior_4k.hdr", &width, &height, &nrComponents, 0);
-  unsigned int hdrTexture;
+  float *data = stbi_loadf("OBJs/cayley_interior_4k.hdr", &width, &height, &nrComponents, 0);
+  unsigned int hdrTexture{};
   if (data)
   {
     glGenTextures(1, &hdrTexture);
