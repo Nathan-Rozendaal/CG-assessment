@@ -153,8 +153,15 @@ class Model
     // normal: texture_normalN
 
     MaterialProperties properties;
-    material->Get(AI_MATKEY_ROUGHNESS_FACTOR,properties.roughness);
+
+    material->Get(AI_MATKEY_USE_ROUGHNESS_MAP, properties.use_roughness_map);
+    material->Get(AI_MATKEY_ROUGHNESS_FACTOR, properties.roughness);
+
+    material->Get(AI_MATKEY_USE_METALLIC_MAP, properties.use_metallic_map);
     material->Get(AI_MATKEY_METALLIC_FACTOR, properties.metallic);
+
+    material->Get(AI_MATKEY_USE_COLOR_MAP, properties.use_color_map);
+    material->Get(AI_MATKEY_COLOR_DIFFUSE, properties.albedo);
 
     // 1. diffuse maps
     vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
@@ -163,7 +170,7 @@ class Model
     vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
     textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
     // 3. normal maps
-    std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+    std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, "texture_normal");
     textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
     // 4. height maps
     std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");

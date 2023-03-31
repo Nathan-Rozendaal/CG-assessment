@@ -8,8 +8,10 @@ in vec3 Normal;
 uniform float metallic;
 uniform float roughness;
 uniform float ao;
+uniform bool use_normal;
 
-uniform sampler2D albedoMap;
+uniform sampler2D texture_diffuse1;
+uniform sampler2D texture_normal1;
 
 // IBL
 uniform samplerCube irradianceMap;
@@ -24,6 +26,22 @@ uniform vec3 camPos;
 
 
 const float PI = 3.14159265359;
+vec3 getNormalFromMap()
+{
+    vec3 tangentNormal = texture(texture_normal1, TexCoords).xyz * 2.0 - 1.0;
+
+    vec3 Q1  = dFdx(WorldPos);
+    vec3 Q2  = dFdy(WorldPos);
+    vec2 st1 = dFdx(TexCoords);
+    vec2 st2 = dFdy(TexCoords);
+
+    vec3 N   = normalize(Normal);
+    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
+    vec3 B  = -normalize(cross(N, T));
+    mat3 TBN = mat3(T, B, N);
+
+    return normalize(TBN * tangentNormal);
+}
 // ----------------------------------------------------------------------------
 float DistributionGGX(vec3 N, vec3 H, float roughness)
 {
@@ -90,10 +108,12 @@ vec3 aces_tonemap(vec3 color){
 void main()
 {
     vec3 albedo;
-    albedo.r = pow(texture(albedoMap, TexCoords).r, 2.2);
-    albedo.g = pow(texture(albedoMap, TexCoords).g, 2.2);
-    albedo.b = pow(texture(albedoMap, TexCoords).b, 2.2);
+    albedo.r = pow(texture(texture_diffuse1, TexCoords).r, 2.2);
+    albedo.g = pow(texture(texture_diffuse1, TexCoords).g, 2.2);
+    albedo.b = pow(texture(texture_diffuse1, TexCoords).b, 2.2);
     vec3 N = normalize(Normal);
+    if (use_normal)
+        N = getNormalFromMap();
     vec3 V = normalize(camPos - WorldPos);
     vec3 R = reflect(-V, N);
 

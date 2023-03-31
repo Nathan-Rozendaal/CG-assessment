@@ -231,7 +231,6 @@ void InitShaders()
   shaders[0].setInt("irradianceMap", 0);
   shaders[0].setInt("prefilterMap", 1);
   shaders[0].setInt("brdfLUT", 2);
-  shaders[0].setInt("albedoMap", 3);
 }
 
 int main(int argc, char** argv)

@@ -40,6 +40,10 @@ struct Texture {
 struct MaterialProperties {
   float roughness;
   float metallic;
+  bool use_roughness_map;
+  bool use_color_map;
+  bool use_metallic_map;
+  aiColor3D albedo;
 };
 
 class Mesh {
@@ -79,7 +83,7 @@ class Mesh {
       // retrieve texture number (the N in diffuse_textureN)
       string number;
       string name = textures[i].type;
-      if(name == "texture_diffuse")
+      if (name == "texture_diffuse")
         number = std::to_string(diffuseNr++);
       else if(name == "texture_specular")
         number = std::to_string(specularNr++); // transfer unsigned int to string
@@ -89,11 +93,16 @@ class Mesh {
         number = std::to_string(heightNr++); // transfer unsigned int to string
 
       // now set the sampler to the correct texture unit
-      glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
+      shader.setInt((name + number).c_str(), 3 + i);
+      
       // and finally bind the texture
       glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
-
+    if (normalNr > 1) {
+      shader.setBool("use_normal", true);
+    } else {
+      shader.setBool("use_normal", false);
+    }
     shader.setMat4("model", model);
     shader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
     shader.setFloat("roughness",properties.roughness);
