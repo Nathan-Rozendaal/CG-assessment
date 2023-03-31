@@ -35,7 +35,12 @@ vector<Shader> shaders = vector<Shader>();
 
 Maps maps;
 
-Camera camera(glm::vec3(0.0f, 1.75f, 4.0f));
+Camera camera1(glm::vec3(0.0f, 1.75f, 4.0f));
+Camera camera2(glm::vec3(0.0f, 5.0f, 4.0f));
+
+Camera* activecam = &camera1;
+
+
 float lastX = WIDTH / 2.0f;
 float lastY = HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -69,13 +74,20 @@ void keyboardHandler(unsigned char key, int a, int b)
   if (key == 27)
     glutExit();
   if (key == 'w')
-    camera.ProcessKeyboard(FORWARD, DELTA_TIME);
+    activecam->ProcessKeyboard(FORWARD, DELTA_TIME);
   if (key == 's')
-    camera.ProcessKeyboard(BACKWARD, DELTA_TIME);
+    activecam->ProcessKeyboard(BACKWARD, DELTA_TIME);
   if (key == 'a')
-    camera.ProcessKeyboard(LEFT, DELTA_TIME);
+    activecam->ProcessKeyboard(LEFT, DELTA_TIME);
   if (key == 'd')
-    camera.ProcessKeyboard(RIGHT, DELTA_TIME);
+    activecam->ProcessKeyboard(RIGHT, DELTA_TIME);
+  if (key == 'v')
+    if (activecam == &camera1) {
+      activecam = &camera2;
+    } else {
+      activecam = &camera1;
+    }
+    
 }
 
 
@@ -101,12 +113,12 @@ void Render()
 
 
 
-  glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
-  glm::mat4 view = camera.GetViewMatrix();
+  glm::mat4 projection = glm::perspective(glm::radians(activecam->Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+  glm::mat4 view = activecam->GetViewMatrix();
 
   shaders[0].setMat4("projection", projection);
   shaders[0].setMat4("view", view);
-  shaders[0].setVec3("camPos", camera.Position);
+  shaders[0].setVec3("camPos", activecam->Position);
 
   // bind pre-computed IBL data
   glActiveTexture(GL_TEXTURE0);
@@ -154,7 +166,7 @@ void mouse_callback(int x, int y)
   lastX = xpos;
   lastY = ypos;
 
-  camera.ProcessMouseMovement(xoffset, yoffset);
+  activecam->ProcessMouseMovement(xoffset, yoffset);
 
   if ( (x > 300 && x < WIDTH - 300) && (y > 300 && y < HEIGHT - 300))
     return;
@@ -163,6 +175,9 @@ void mouse_callback(int x, int y)
   lastY = HEIGHT/2;
   glutWarpPointer(WIDTH/2, HEIGHT/2);  //centers the cursor
 
+}
+void mouseWheel(int button, int dir, int x, int y) {
+  activecam->ProcessMouseScroll(dir);
 }
 
 
@@ -186,6 +201,7 @@ void InitGlutGlew(int argc, char** argv)
   glutKeyboardFunc(keyboardHandler);
   glutTimerFunc(DELTA_TIME, Render, 0);
   glutPassiveMotionFunc(mouse_callback);
+  glutMouseWheelFunc(mouseWheel);
   glutSetCursor(GLUT_CURSOR_NONE);
 
   glEnable(GL_DEPTH_TEST);
@@ -210,6 +226,12 @@ void InitShaders()
 {
   shaders.push_back(Shader(vertexshader_name, fragshader_name));
   program_id = shaders[0].ID;
+  // set texture indices
+  shaders[0].use();
+  shaders[0].setInt("irradianceMap", 0);
+  shaders[0].setInt("prefilterMap", 1);
+  shaders[0].setInt("brdfLUT", 2);
+  shaders[0].setInt("albedoMap", 3);
 }
 
 int main(int argc, char** argv)
@@ -217,16 +239,11 @@ int main(int argc, char** argv)
   InitGlutGlew(argc, argv);
 
   InitShaders();
-  shaders[0].use();
-  //set texture indices
-  shaders[0].setInt("irradianceMap", 0);
-  shaders[0].setInt("prefilterMap", 1);
-  shaders[0].setInt("brdfLUT", 2);
-  shaders[0].setInt("albedoMap", 3);
 
-  models.push_back(Model("OBJs/lotus49/lotus49.gltf"));
+  models.push_back(Model("OBJs/ferrari_312/ferrari_312.gltf"));
 
   maps = initIBL();
+
   // Main loop
   glutMainLoop();
 
