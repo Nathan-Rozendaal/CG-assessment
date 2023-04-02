@@ -40,9 +40,6 @@ struct Texture {
 struct MaterialProperties {
   float roughness;
   float metallic;
-  bool use_roughness_map;
-  bool use_color_map;
-  bool use_metallic_map;
   aiColor3D albedo;
 };
 
@@ -70,13 +67,13 @@ class Mesh {
   }
 
   // render the mesh
-  void Draw(Shader &shader)
+  void Draw(Shader &shader, glm::mat4 basemodel)
   {
     // bind appropriate textures
     unsigned int diffuseNr  = 1;
-    unsigned int specularNr = 1;
+    unsigned int roughnessNr = 1;
     unsigned int normalNr   = 1;
-    unsigned int heightNr   = 1;
+    unsigned int metallicNr   = 1;
     for(unsigned int i = 0; i < textures.size(); i++)
     {
       glActiveTexture(GL_TEXTURE3 + i); // active proper texture unit before binding
@@ -85,12 +82,12 @@ class Mesh {
       string name = textures[i].type;
       if (name == "texture_diffuse")
         number = std::to_string(diffuseNr++);
-      else if(name == "texture_specular")
-        number = std::to_string(specularNr++); // transfer unsigned int to string
+      else if(name == "texture_roughness")
+        number = std::to_string(roughnessNr++);  // transfer unsigned int to string
       else if(name == "texture_normal")
         number = std::to_string(normalNr++); // transfer unsigned int to string
-      else if(name == "texture_height")
-        number = std::to_string(heightNr++); // transfer unsigned int to string
+      else if(name == "texture_metallic")
+        number = std::to_string(metallicNr++);  // transfer unsigned int to string
 
       // now set the sampler to the correct texture unit
       shader.setInt((name + number).c_str(), 3 + i);
@@ -98,15 +95,16 @@ class Mesh {
       // and finally bind the texture
       glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
-    if (normalNr > 1) {
-      shader.setBool("use_normal", true);
-    } else {
-      shader.setBool("use_normal", false);
-    }
-    shader.setMat4("model", model);
-    shader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
-    shader.setFloat("roughness",properties.roughness);
-    shader.setFloat("metallic",properties.metallic);
+
+    shader.setBool("use_diffuse", diffuseNr -1);
+    shader.setBool("use_roughness", roughnessNr - 1);
+    shader.setBool("use_normal", normalNr - 1);
+    shader.setBool("use_metallic", metallicNr - 1);
+    shader.setMat4("model", basemodel * model);
+    shader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(basemodel * model))));
+    shader.setFloat("uroughness",properties.roughness);
+    shader.setFloat("umetallic",properties.metallic);
+    shader.setVec3("udiffuse", glm::vec3(properties.albedo.r,properties.albedo.g,properties.albedo.b));
 
     // draw mesh
     glBindVertexArray(VAO);

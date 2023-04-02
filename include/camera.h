@@ -40,9 +40,14 @@ class Camera
   float MovementSpeed;
   float MouseSensitivity;
   float Zoom;
+  bool LockY = true;
 
   // constructor with vectors
-  Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+  Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), bool LockY = true,
+         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
+         float yaw = YAW,
+         float pitch = PITCH)
+      : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM), LockY(LockY)
   {
     Position = position;
     WorldUp = up;
@@ -51,7 +56,8 @@ class Camera
     updateCameraVectors();
   }
   // constructor with scalar values
-  Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+  Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch, bool LockY)
+      : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM), LockY(LockY)
   {
     Position = glm::vec3(posX, posY, posZ);
     WorldUp = glm::vec3(upX, upY, upZ);
@@ -72,12 +78,20 @@ class Camera
     float velocity = MovementSpeed * deltaTime;
     if (direction == FORWARD)
     {
+      if (!LockY) {
+        Position += Front * velocity;
+        return;
+      }
       glm::vec3 dir = glm::vec3(Front.x,0,Front.z);
       dir = glm::normalize(dir);
       Position += dir * velocity;
     }
     if (direction == BACKWARD)
     {
+      if (!LockY) {
+        Position -= Front * velocity;
+        return;
+      }
       glm::vec3 dir = glm::vec3(Front.x,0,Front.z);
       dir = glm::normalize(dir);
       Position -= dir * velocity;

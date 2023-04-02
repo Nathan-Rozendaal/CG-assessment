@@ -28,12 +28,14 @@ class Model
   // model data
   vector<Texture> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
   vector<Mesh>    meshes;
+  glm::mat4 model;
   string directory;
   bool gammaCorrection;
 
   // constructor, expects a filepath to a 3D model.
   Model(string const &path, bool gamma = false) : gammaCorrection(gamma)
   {
+    model = glm::mat4();
     loadModel(path);
   }
 
@@ -41,7 +43,7 @@ class Model
   void Draw(Shader &shader)
   {
     for(unsigned int i = 0; i < meshes.size(); i++)
-      meshes[i].Draw(shader);
+      meshes[i].Draw(shader, model);
   }
 
  private:
@@ -154,27 +156,24 @@ class Model
 
     MaterialProperties properties;
 
-    material->Get(AI_MATKEY_USE_ROUGHNESS_MAP, properties.use_roughness_map);
     material->Get(AI_MATKEY_ROUGHNESS_FACTOR, properties.roughness);
 
-    material->Get(AI_MATKEY_USE_METALLIC_MAP, properties.use_metallic_map);
     material->Get(AI_MATKEY_METALLIC_FACTOR, properties.metallic);
 
-    material->Get(AI_MATKEY_USE_COLOR_MAP, properties.use_color_map);
     material->Get(AI_MATKEY_COLOR_DIFFUSE, properties.albedo);
 
     // 1. diffuse maps
     vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
     textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-    // 2. specular maps
-    vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-    textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+    // 2. roughness maps
+    vector<Texture> roughnessMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE_ROUGHNESS, "texture_roughness");
+    textures.insert(textures.end(), roughnessMaps.begin(), roughnessMaps.end());
     // 3. normal maps
     std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, "texture_normal");
     textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-    // 4. height maps
-    std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
-    textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+    // 4. metallic maps
+    std::vector<Texture> metallicMaps = loadMaterialTextures(material, aiTextureType_METALNESS, "texture_metallic");
+    textures.insert(textures.end(), metallicMaps.begin(), metallicMaps.end());
 
     // return a mesh object created from the extracted mesh data
     return Mesh(vertices, indices, textures, model, properties);

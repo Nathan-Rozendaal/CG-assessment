@@ -22,7 +22,7 @@ using namespace std;
 // Consts
 //--------------------------------------------------------------------------------
 
-const int WIDTH = 1200, HEIGHT = 900;
+const int WIDTH = 1920, HEIGHT = 1080;
 int window=0;
 
 const char* fragshader_name = "shaders/fragpbr.frag";
@@ -36,7 +36,7 @@ vector<Shader> shaders = vector<Shader>();
 Maps maps;
 
 Camera camera1(glm::vec3(0.0f, 1.75f, 4.0f));
-Camera camera2(glm::vec3(0.0f, 5.0f, 4.0f));
+Camera camera2(glm::vec3(0.0f, 5.0f, 4.0f),false);
 
 Camera* activecam = &camera1;
 
@@ -52,10 +52,10 @@ glm::vec3 lightPositions[] = {
     glm::vec3( 3.0f, 3.0f, -3.0f),
 };
 glm::vec3 lightColors[] = {
-    glm::vec3(300.0f, 300.0f, 300.0f),
-    glm::vec3(300.0f, 300.0f, 300.0f),
-    glm::vec3(300.0f, 300.0f, 300.0f),
-    glm::vec3(300.0f, 300.0f, 300.0f)
+    glm::vec3(40.0f, 40.0f, 20.0f),
+    glm::vec3(40.0f, 40.0f, 20.0f),
+    glm::vec3(40.0f, 40.0f, 20.0f),
+    glm::vec3(40.0f, 40.0f, 20.0f)
 };
 
 
@@ -231,6 +231,12 @@ void InitShaders()
   shaders[0].setInt("irradianceMap", 0);
   shaders[0].setInt("prefilterMap", 1);
   shaders[0].setInt("brdfLUT", 2);
+
+  // bind samplers to a dummy texture first
+  shaders[0].setInt("texture_diffuse1", 1);
+  shaders[0].setInt("texture_normal1", 1);
+  shaders[0].setInt("texture_roughness1", 1);
+  shaders[0].setInt("texture_metallic1", 1);
 }
 
 int main(int argc, char** argv)
@@ -239,7 +245,14 @@ int main(int argc, char** argv)
 
   InitShaders();
 
+  models.push_back(Model("OBJs/wood/wood.gltf"));
   models.push_back(Model("OBJs/ferrari_312/ferrari_312.gltf"));
+  models.push_back(Model("OBJs/lotus/lotus.gltf"));
+  models[2].model = glm::translate(glm::mat4(), glm::vec3(2.5,0,0));
+  models.push_back(Model("OBJs/lotus49/lotus49.gltf"));
+  models[3].model = glm::translate(glm::mat4(), glm::vec3(-2.5, 0, 0));
+  models.push_back(Model("OBJs/sf70h/sf70h.gltf"));
+  models[4].model = glm::translate(glm::mat4(), glm::vec3(5, 0, 0));
 
   maps = initIBL();
 

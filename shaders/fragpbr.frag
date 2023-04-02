@@ -5,13 +5,20 @@ in vec3 WorldPos;
 in vec3 Normal;
 
 // material parameters
-uniform float metallic;
-uniform float roughness;
+uniform vec3 udiffuse;
+uniform float umetallic;
+uniform float uroughness;
 uniform float ao;
+
+uniform bool use_diffuse;
+uniform bool use_roughness;
 uniform bool use_normal;
+uniform bool use_metallic;
 
 uniform sampler2D texture_diffuse1;
+uniform sampler2D texture_roughness1;
 uniform sampler2D texture_normal1;
+uniform sampler2D texture_metallic1;
 
 // IBL
 uniform samplerCube irradianceMap;
@@ -26,6 +33,14 @@ uniform vec3 camPos;
 
 
 const float PI = 3.14159265359;
+
+float getMetallicFromMap()
+{
+    float value = texture(texture_metallic1, TexCoords).r;
+    value = value + 0.01f;
+    return value;
+}
+
 vec3 getNormalFromMap()
 {
     vec3 tangentNormal = texture(texture_normal1, TexCoords).xyz * 2.0 - 1.0;
@@ -107,15 +122,28 @@ vec3 aces_tonemap(vec3 color){
 // ----------------------------------------------------------------------------
 void main()
 {
-    vec3 albedo;
-    albedo.r = pow(texture(texture_diffuse1, TexCoords).r, 2.2);
-    albedo.g = pow(texture(texture_diffuse1, TexCoords).g, 2.2);
-    albedo.b = pow(texture(texture_diffuse1, TexCoords).b, 2.2);
+    vec3 albedo = udiffuse;
+    if (use_diffuse){
+        albedo.r = pow(texture(texture_diffuse1, TexCoords).r, 2.2);
+        albedo.g = pow(texture(texture_diffuse1, TexCoords).g, 2.2);
+        albedo.b = pow(texture(texture_diffuse1, TexCoords).b, 2.2);
+    }
+    
     vec3 N = normalize(Normal);
     if (use_normal)
         N = getNormalFromMap();
+
     vec3 V = normalize(camPos - WorldPos);
     vec3 R = reflect(-V, N);
+
+    float metallic = umetallic;
+    if (use_normal)
+        metallic = texture(texture_metallic1, TexCoords).r;
+    
+
+    float roughness = uroughness;
+    if (use_roughness)
+        roughness = texture(texture_roughness1, TexCoords).r;
 
     // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0
     // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)
@@ -182,7 +210,5 @@ void main()
 
     // HDR tonemapping
     color = aces_tonemap(color);
-
-
     FragColor = vec4(color , 1.0);
 }
