@@ -1,13 +1,9 @@
 #include <iostream>
 
-
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
-
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include "glsl.hpp"
 #include "IBL.h"
@@ -22,13 +18,13 @@ using namespace std;
 // Consts
 //--------------------------------------------------------------------------------
 
-const int WIDTH = 1920, HEIGHT = 1080;
+int WIDTH = 1280, HEIGHT = 740;
 int window=0;
 
 const char* fragshader_name = "shaders/fragpbr.frag";
 const char* vertexshader_name = "shaders/vertprb.vert";
 
-unsigned const int DELTA_TIME =10;
+unsigned const int DELTA_TIME = 10;
 
 vector<Model> models = vector<Model>();
 vector<Shader> shaders = vector<Shader>();
@@ -70,32 +66,6 @@ glm::vec3 lightColors[] = {
 GLuint program_id;
 
 //--------------------------------------------------------------------------------
-// Keyboard handling
-//--------------------------------------------------------------------------------
-
-void keyboardHandler(unsigned char key, int a, int b)
-{
-  if (key == 27)
-    glutExit();
-  if (key == 'w')
-    activecam->ProcessKeyboard(FORWARD, DELTA_TIME);
-  if (key == 's')
-    activecam->ProcessKeyboard(BACKWARD, DELTA_TIME);
-  if (key == 'a')
-    activecam->ProcessKeyboard(LEFT, DELTA_TIME);
-  if (key == 'd')
-    activecam->ProcessKeyboard(RIGHT, DELTA_TIME);
-  if (key == 'v')
-    if (activecam == &camera1) {
-      activecam = &camera2;
-    } else {
-      activecam = &camera1;
-    }
-    
-}
-
-
-//--------------------------------------------------------------------------------
 // Rendering
 //--------------------------------------------------------------------------------
 
@@ -107,25 +77,22 @@ void Render()
 
   shaders[0].use();
 
+  // Pass lights to shader
   for (unsigned int i = 0; i < sizeof(lightPositions) / sizeof(lightPositions[0]); ++i) {
     shaders[0].setVec3("lightPositions[" + std::to_string(i) + "]", lightPositions[i]);
     shaders[0].setVec3("lightColors[" + std::to_string(i) + "]", lightColors[i]);
   }
-  shaders[0].setFloat("ao", 1.0f);
-
+  
   glViewport(0, 0, WIDTH, HEIGHT);
 
-
-
+  // Set projection and view matrices
   glm::mat4 projection = glm::perspective(glm::radians(activecam->Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
   glm::mat4 view = activecam->GetViewMatrix();
-
-  models[0].model = glm::rotate(models[0].model, 0.0001f * DELTA_TIME, glm::vec3(0, 1, 0));
-  models[1].model = glm::rotate(models[1].model, 0.0001f * DELTA_TIME, glm::vec3(0, 1, 0));
 
   shaders[0].setMat4("projection", projection);
   shaders[0].setMat4("view", view);
   shaders[0].setVec3("camPos", activecam->Position);
+  shaders[0].setFloat("ao", 1.0f);
 
   // bind pre-computed IBL data
   glActiveTexture(GL_TEXTURE0);
@@ -135,8 +102,9 @@ void Render()
   glActiveTexture(GL_TEXTURE2);
   glBindTexture(GL_TEXTURE_2D, maps.brdfLUTTexture);
 
-
+  //Draw all models
   for (auto & model : models) {
+    model.AnimationStep(DELTA_TIME);
     model.Draw(shaders[0]);
   }
 
@@ -155,6 +123,33 @@ void Render(int n)
   Render();
   glutTimerFunc(DELTA_TIME, Render, 0);
 }
+
+//--------------------------------------------------------------------------------
+// Handles the keyboard
+//--------------------------------------------------------------------------------
+void keyboardHandler(unsigned char key, int a, int b) {
+  if (key == 27)
+    glutExit();
+  if (key == 'w')
+    activecam->ProcessKeyboard(FORWARD, DELTA_TIME);
+  if (key == 's')
+    activecam->ProcessKeyboard(BACKWARD, DELTA_TIME);
+  if (key == 'a')
+    activecam->ProcessKeyboard(LEFT, DELTA_TIME);
+  if (key == 'd')
+    activecam->ProcessKeyboard(RIGHT, DELTA_TIME);
+  if (key == 'v')
+    if (activecam == &camera1) {
+      activecam = &camera2;
+    } else {
+      activecam = &camera1;
+    }
+}
+
+//------------------------------------------------------------
+// Handles mouse movement
+//------------------------------------------------------------
+
 void mouse_callback(int x, int y)
 {
   float xpos = static_cast<float>(x);
@@ -183,6 +178,7 @@ void mouse_callback(int x, int y)
   glutWarpPointer(WIDTH/2, HEIGHT/2);  //centers the cursor
 
 }
+
 void mouseWheel(int button, int dir, int x, int y) {
   activecam->ProcessMouseScroll(dir);
 }
@@ -210,15 +206,15 @@ void InitGlutGlew(int argc, char** argv)
   glutPassiveMotionFunc(mouse_callback);
   glutMouseWheelFunc(mouseWheel);
   glutSetCursor(GLUT_CURSOR_NONE);
-
-  glEnable(GL_DEPTH_TEST);
-  // set depth function to less than AND equal for skybox depth trick.
-  glDepthFunc(GL_LEQUAL);
   // enable seamless cubemap sampling for lower mip levels in the pre-filter map.
   glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
   glEnable(GL_MULTISAMPLE);
   glEnable(GL_DEPTH_TEST);
   glDisable(GL_CULL_FACE);
+
+  glutFullScreen();
+  WIDTH = glutGet(GLUT_SCREEN_WIDTH);
+  HEIGHT = glutGet(GLUT_SCREEN_HEIGHT);
 
   glewInit();
 }
@@ -245,24 +241,33 @@ void InitShaders()
   shaders[0].setInt("texture_roughness1", 1);
   shaders[0].setInt("texture_metallic1", 1);
 }
+
+//------------------------------------------------------------
+// void LoadModels()
+// Loads the models and adds transforms and animations
+//------------------------------------------------------------
 void LoadModels() 
 {
   models.push_back(Model("OBJs/platform/platform.gltf"));
+  models[0].animationBehaviours.push_back(new RotationBehaviour());
+  models[0].animationBehaviours.push_back(new YMovementBehaviour());
 
   models.push_back(Model("OBJs/lotus/lotus.gltf"));
   models[1].model = glm::translate(glm::mat4(), glm::vec3(0, 0.08, 0));
+  models[1].animationBehaviours.push_back(new RotationBehaviour());
+  models[1].animationBehaviours.push_back(new YMovementBehaviour());
 
   models.push_back(Model("OBJs/ferrari_312t/ferrari_312t.gltf"));
-  models[2].model = glm::translate(glm::rotate(glm::mat4(), -1.0f, glm::vec3(0, 1, 0)), glm::vec3(-5, 0, 0));
+  models[2].model = glm::translate(glm::rotate(glm::mat4(), -1.0f, glm::vec3(0, 1, 0)), glm::vec3(-5.5, 0, 0));
 
   models.push_back(Model("OBJs/lotus49/lotus49.gltf"));
-  models[3].model = glm::translate(glm::rotate(glm::mat4(), 1.0f, glm::vec3(0, 1, 0)), glm::vec3(5, 0, 0));
+  models[3].model = glm::translate(glm::rotate(glm::mat4(), 1.0f, glm::vec3(0, 1, 0)), glm::vec3(5.5, 0, 0));
 
   models.push_back(Model("OBJs/lotus98t/lotus98t.gltf"));
-  models[4].model = glm::translate(glm::mat4(), glm::vec3(5, 0, 0));
+  models[4].model = glm::translate(glm::rotate(glm::mat4(), -0.5f, glm::vec3(0, 1, 0)), glm::vec3(5.5, 0, 0));
 
   models.push_back(Model("OBJs/ferrari_312/ferrari_312.gltf"));
-  models[5].model = glm::translate(glm::mat4(), glm::vec3(-5, 0, 0));
+  models[5].model = glm::translate(glm::rotate(glm::mat4(), 0.5f, glm::vec3(0, 1, 0)), glm::vec3(-5.5, 0, 0));
   models.push_back(Model("OBJs/Room/Room.gltf"));
 }
 

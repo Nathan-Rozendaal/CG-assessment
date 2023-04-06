@@ -51,7 +51,8 @@ CPMAddPackage(
 set(SOURCE_FILES
         src/main.cpp
         src/glsl.cpp
-        )
+        src/IBL.cpp 
+        src/AnimationBehaviours.cpp)
 
 set(HEADER_FILES
         include/glsl.hpp
@@ -61,7 +62,7 @@ set(HEADER_FILES
         include/camera.h
         include/stb_image.h
         include/IBL.h
-        )
+        include/AnimationBehaviours.h)
 
 # Create an executable called `Simple_OpenGL` with the files we declared earlier
 add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})

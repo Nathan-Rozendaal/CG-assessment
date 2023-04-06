@@ -18,6 +18,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <AnimationBehaviours.h>
 using namespace std;
 
 unsigned int TextureFromFile(const char *path, const string &directory, bool gamma = false);
@@ -28,6 +29,7 @@ class Model
   // model data
   vector<Texture> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
   vector<Mesh>    meshes;
+  vector<IAnimationBehaviour*> animationBehaviours;
   glm::mat4 model;
   string directory;
   bool gammaCorrection;
@@ -36,6 +38,7 @@ class Model
   Model(string const &path, bool gamma = false) : gammaCorrection(gamma)
   {
     model = glm::mat4();
+    animationBehaviours = vector<IAnimationBehaviour*>();
     loadModel(path);
   }
 
@@ -44,6 +47,11 @@ class Model
   {
     for(unsigned int i = 0; i < meshes.size(); i++)
       meshes[i].Draw(shader, model);
+  }
+
+  void AnimationStep(float delta) {
+    for (unsigned int i = 0; i < animationBehaviours.size(); i++)
+      model = animationBehaviours[i]->animationStep(delta) * model;
   }
 
  private:
