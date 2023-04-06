@@ -36,7 +36,7 @@ vector<Shader> shaders = vector<Shader>();
 Maps maps;
 
 Camera camera1(glm::vec3(0.0f, 1.75f, 4.0f));
-Camera camera2(glm::vec3(0.0f, 5.0f, 4.0f),false);
+Camera camera2(glm::vec3(6.0f, 4.5f, 6.0f), false, glm::vec3(0.0f, 1.0f, 0.0f), -125, -30);
 
 Camera* activecam = &camera1;
 
@@ -46,16 +46,20 @@ float lastY = HEIGHT / 2.0f;
 bool firstMouse = true;
 
 glm::vec3 lightPositions[] = {
-    glm::vec3(-3.0f,  3.0f, 3.0f),
-    glm::vec3( 3.0f,  3.0f, 3.0f),
-    glm::vec3(-3.0f, 3.0f, -3.0f),
-    glm::vec3( 3.0f, 3.0f, -3.0f),
+    glm::vec3(-4.0f, 4.5f, 5.5f),
+    glm::vec3( 4.0f, 4.5f, 5.5f),
+    glm::vec3(-4.0f, 4.5f, -5.5f),
+    glm::vec3(4.0f, 4.5f, -5.5f), 
+    glm::vec3(-4.0f, 4.5f, 0.0f), 
+    glm::vec3(4.0f, 4.5f, 0.0f)
 };
 glm::vec3 lightColors[] = {
-    glm::vec3(40.0f, 40.0f, 20.0f),
-    glm::vec3(40.0f, 40.0f, 20.0f),
-    glm::vec3(40.0f, 40.0f, 20.0f),
-    glm::vec3(40.0f, 40.0f, 20.0f)
+    glm::vec3(70.0f, 70.0f, 70.0f),
+    glm::vec3(70.0f, 70.0f, 70.0f),
+    glm::vec3(70.0f, 70.0f, 70.0f),
+    glm::vec3(70.0f, 70.0f, 70.0f),
+    glm::vec3(70.0f, 70.0f, 70.0f),
+    glm::vec3(70.0f, 70.0f, 70.0f)
 };
 
 
@@ -115,6 +119,9 @@ void Render()
 
   glm::mat4 projection = glm::perspective(glm::radians(activecam->Zoom), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
   glm::mat4 view = activecam->GetViewMatrix();
+
+  models[0].model = glm::rotate(models[0].model, 0.0001f * DELTA_TIME, glm::vec3(0, 1, 0));
+  models[1].model = glm::rotate(models[1].model, 0.0001f * DELTA_TIME, glm::vec3(0, 1, 0));
 
   shaders[0].setMat4("projection", projection);
   shaders[0].setMat4("view", view);
@@ -238,6 +245,26 @@ void InitShaders()
   shaders[0].setInt("texture_roughness1", 1);
   shaders[0].setInt("texture_metallic1", 1);
 }
+void LoadModels() 
+{
+  models.push_back(Model("OBJs/platform/platform.gltf"));
+
+  models.push_back(Model("OBJs/lotus/lotus.gltf"));
+  models[1].model = glm::translate(glm::mat4(), glm::vec3(0, 0.08, 0));
+
+  models.push_back(Model("OBJs/ferrari_312t/ferrari_312t.gltf"));
+  models[2].model = glm::translate(glm::rotate(glm::mat4(), -1.0f, glm::vec3(0, 1, 0)), glm::vec3(-5, 0, 0));
+
+  models.push_back(Model("OBJs/lotus49/lotus49.gltf"));
+  models[3].model = glm::translate(glm::rotate(glm::mat4(), 1.0f, glm::vec3(0, 1, 0)), glm::vec3(5, 0, 0));
+
+  models.push_back(Model("OBJs/lotus98t/lotus98t.gltf"));
+  models[4].model = glm::translate(glm::mat4(), glm::vec3(5, 0, 0));
+
+  models.push_back(Model("OBJs/ferrari_312/ferrari_312.gltf"));
+  models[5].model = glm::translate(glm::mat4(), glm::vec3(-5, 0, 0));
+  models.push_back(Model("OBJs/Room/Room.gltf"));
+}
 
 int main(int argc, char** argv)
 {
@@ -245,14 +272,7 @@ int main(int argc, char** argv)
 
   InitShaders();
 
-  models.push_back(Model("OBJs/wood/wood.gltf"));
-  models.push_back(Model("OBJs/ferrari_312/ferrari_312.gltf"));
-  models.push_back(Model("OBJs/lotus/lotus.gltf"));
-  models[2].model = glm::translate(glm::mat4(), glm::vec3(2.5,0,0));
-  models.push_back(Model("OBJs/lotus49/lotus49.gltf"));
-  models[3].model = glm::translate(glm::mat4(), glm::vec3(-2.5, 0, 0));
-  models.push_back(Model("OBJs/sf70h/sf70h.gltf"));
-  models[4].model = glm::translate(glm::mat4(), glm::vec3(5, 0, 0));
+  LoadModels();
 
   maps = initIBL();
 

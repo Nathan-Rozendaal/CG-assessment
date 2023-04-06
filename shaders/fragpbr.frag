@@ -26,8 +26,8 @@ uniform samplerCube prefilterMap;
 uniform sampler2D brdfLUT;
 
 // lights
-uniform vec3 lightPositions[4];
-uniform vec3 lightColors[4];
+uniform vec3 lightPositions[6];
+uniform vec3 lightColors[6];
 
 uniform vec3 camPos;
 
@@ -137,13 +137,13 @@ void main()
     vec3 R = reflect(-V, N);
 
     float metallic = umetallic;
-    if (use_normal)
-        metallic = texture(texture_metallic1, TexCoords).r;
+    if (use_metallic)
+        metallic = texture(texture_metallic1, TexCoords).b;
     
 
     float roughness = uroughness;
     if (use_roughness)
-        roughness = texture(texture_roughness1, TexCoords).r;
+        roughness = texture(texture_roughness1, TexCoords).g;
 
     // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0
     // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)
@@ -152,7 +152,7 @@ void main()
 
     // reflectance equation
     vec3 Lo = vec3(0.0);
-    for(int i = 0; i < 4; ++i)
+    for(int i = 0; i < 6; ++i)
     {
         // calculate per-light radiance
         vec3 L = normalize(lightPositions[i] - WorldPos);

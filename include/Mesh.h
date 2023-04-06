@@ -96,10 +96,10 @@ class Mesh {
       glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
 
-    shader.setBool("use_diffuse", diffuseNr -1);
-    shader.setBool("use_roughness", roughnessNr - 1);
-    shader.setBool("use_normal", normalNr - 1);
-    shader.setBool("use_metallic", metallicNr - 1);
+    shader.setBool("use_diffuse", diffuseNr > 1);
+    shader.setBool("use_roughness", roughnessNr > 1);
+    shader.setBool("use_normal", normalNr > 1);
+    shader.setBool("use_metallic", metallicNr > 1);
     shader.setMat4("model", basemodel * model);
     shader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(basemodel * model))));
     shader.setFloat("uroughness",properties.roughness);
