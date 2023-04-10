@@ -69,6 +69,12 @@ class Mesh {
   // render the mesh
   void Draw(Shader &shader, glm::mat4 basemodel)
   {
+    // bind samplers to the default texture
+    shader.setInt("texture_diffuse1", 10);
+    shader.setInt("texture_normal1", 10);
+    shader.setInt("texture_roughness1", 10);
+    shader.setInt("texture_metallic1", 10);
+
     // bind appropriate textures
     unsigned int diffuseNr  = 1;
     unsigned int roughnessNr = 1;

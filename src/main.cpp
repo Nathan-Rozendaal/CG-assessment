@@ -235,11 +235,16 @@ void InitShaders()
   shaders[0].setInt("prefilterMap", 1);
   shaders[0].setInt("brdfLUT", 2);
 
-  // bind samplers to a dummy texture first
-  shaders[0].setInt("texture_diffuse1", 1);
-  shaders[0].setInt("texture_normal1", 1);
-  shaders[0].setInt("texture_roughness1", 1);
-  shaders[0].setInt("texture_metallic1", 1);
+  // Generate a default texture because some meshes do not have one applied
+  GLuint defaultTexture;
+  glGenTextures(1, &defaultTexture);
+  glBindTexture(GL_TEXTURE_2D, defaultTexture);
+  unsigned char whitePixel[] = {255, 255, 255, 255};
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, whitePixel);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glActiveTexture(GL_TEXTURE10);
+  glBindTexture(GL_TEXTURE_2D, defaultTexture);
 }
 
 //------------------------------------------------------------
