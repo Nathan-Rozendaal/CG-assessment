@@ -20,3 +20,12 @@ class YMovementBehaviour : public IAnimationBehaviour {
  public:
   glm::mat4 animationStep(float delta);
 };
+
+class XMovementBehaviour : public IAnimationBehaviour {
+ private:
+  float time = 0;
+  float amplitude;
+ public:
+  XMovementBehaviour(float amplitude);
+  glm::mat4 animationStep(float delta);
+};

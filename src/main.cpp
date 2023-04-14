@@ -31,7 +31,7 @@ vector<Shader> shaders = vector<Shader>();
 
 Maps maps;
 
-Camera camera1(glm::vec3(0.0f, 1.75f, 4.0f));
+Camera camera1(glm::vec3(0.0f, 1.75f, 9.5f));
 Camera camera2(glm::vec3(6.0f, 4.5f, 6.0f), false, glm::vec3(0.0f, 1.0f, 0.0f), -125, -30);
 
 Camera* activecam = &camera1;
@@ -257,7 +257,7 @@ void LoadModels()
   models[0].animationBehaviours.push_back(new RotationBehaviour());
   models[0].animationBehaviours.push_back(new YMovementBehaviour());
 
-  models.push_back(Model("OBJs/lotus/lotus.gltf"));
+  models.push_back(Model("OBJs/lotus72D/lotus72D.gltf"));
   models[1].model = glm::translate(glm::mat4(), glm::vec3(0, 0.08, 0));
   models[1].animationBehaviours.push_back(new RotationBehaviour());
   models[1].animationBehaviours.push_back(new YMovementBehaviour());
@@ -274,6 +274,11 @@ void LoadModels()
   models.push_back(Model("OBJs/ferrari_312/ferrari_312.gltf"));
   models[5].model = glm::translate(glm::rotate(glm::mat4(), 0.5f, glm::vec3(0, 1, 0)), glm::vec3(-5.5, 0, 0));
   models.push_back(Model("OBJs/Room/Room.gltf"));
+
+  models.push_back(Model("OBJs/Doors/door1.gltf"));
+  models[7].animationBehaviours.push_back(new XMovementBehaviour(2.3f));
+  models.push_back(Model("OBJs/Doors/door2.gltf"));
+  models[8].animationBehaviours.push_back(new XMovementBehaviour(4.6f));
 }
 
 int main(int argc, char** argv)
