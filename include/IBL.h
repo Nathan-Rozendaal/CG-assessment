@@ -29,4 +29,4 @@ void renderCube();
 // -----------------------------------------
 void renderQuad();
 
-Maps initIBL();
+Maps initIBL(const char* hdrPath);

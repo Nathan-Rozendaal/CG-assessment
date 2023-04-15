@@ -1,7 +1,7 @@
 #include "include/IBL.h"
 
 
-Maps initIBL() {
+Maps initIBL(const char * hdrPath) {
   Shader equirectangularToCubemapShader = Shader("shaders/vertcubemap.vert", "shaders/fragrectangular_to_cube.frag");
   Shader irradianceShader = Shader("shaders/vertcubemap.vert", "shaders/fragirradicance_conv.frag");
   Shader prefilterShader = Shader("shaders/vertcubemap.vert", "shaders/fragprefilter.frag");
@@ -22,7 +22,7 @@ Maps initIBL() {
   // ---------------------------------
   stbi_set_flip_vertically_on_load(true);
   int width, height, nrComponents;
-  float *data = stbi_loadf("OBJs/room.hdr", &width, &height, &nrComponents, 0);
+  float *data = stbi_loadf(hdrPath, &width, &height, &nrComponents, 0);
   unsigned int hdrTexture{};
   if (data) {
     glGenTextures(1, &hdrTexture);

@@ -13,7 +13,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 using namespace std;
 
-
 //--------------------------------------------------------------------------------
 // Consts
 //--------------------------------------------------------------------------------
@@ -25,6 +24,18 @@ const char* fragshader_name = "shaders/fragpbr.frag";
 const char* vertexshader_name = "shaders/vertprb.vert";
 
 unsigned const int DELTA_TIME = 10;
+
+const glm::vec3 lightPositions[] = {glm::vec3(-4.0f, 4.5f, 5.5f),  glm::vec3(4.0f, 4.5f, 5.5f),
+                                    glm::vec3(-4.0f, 4.5f, -5.5f), glm::vec3(4.0f, 4.5f, -5.5f),
+                                    glm::vec3(-4.0f, 4.5f, 0.0f),  glm::vec3(4.0f, 4.5f, 0.0f)};
+const glm::vec3 lightColors[] = {glm::vec3(70.0f, 70.0f, 70.0f), glm::vec3(70.0f, 70.0f, 70.0f),
+                                 glm::vec3(70.0f, 70.0f, 70.0f), glm::vec3(70.0f, 70.0f, 70.0f),
+                                 glm::vec3(70.0f, 70.0f, 70.0f), glm::vec3(70.0f, 70.0f, 70.0f)};
+
+
+//--------------------------------------------------------------------------------
+// Variables
+//--------------------------------------------------------------------------------
 
 vector<Model> models = vector<Model>();
 vector<Shader> shaders = vector<Shader>();
@@ -41,27 +52,6 @@ float lastX = WIDTH / 2.0f;
 float lastY = HEIGHT / 2.0f;
 bool firstMouse = true;
 
-glm::vec3 lightPositions[] = {
-    glm::vec3(-4.0f, 4.5f, 5.5f),
-    glm::vec3( 4.0f, 4.5f, 5.5f),
-    glm::vec3(-4.0f, 4.5f, -5.5f),
-    glm::vec3(4.0f, 4.5f, -5.5f), 
-    glm::vec3(-4.0f, 4.5f, 0.0f), 
-    glm::vec3(4.0f, 4.5f, 0.0f)
-};
-glm::vec3 lightColors[] = {
-    glm::vec3(70.0f, 70.0f, 70.0f),
-    glm::vec3(70.0f, 70.0f, 70.0f),
-    glm::vec3(70.0f, 70.0f, 70.0f),
-    glm::vec3(70.0f, 70.0f, 70.0f),
-    glm::vec3(70.0f, 70.0f, 70.0f),
-    glm::vec3(70.0f, 70.0f, 70.0f)
-};
-
-
-//--------------------------------------------------------------------------------
-// Variables
-//--------------------------------------------------------------------------------
 // ID's
 GLuint program_id;
 
@@ -198,7 +188,7 @@ void InitGlutGlew(int argc, char** argv)
   glHint(GL_MULTISAMPLE_FILTER_HINT_NV, GL_NICEST);
 
   glutInitWindowSize(WIDTH, HEIGHT);
-  window = glutCreateWindow("Hello OpenGL");
+  window = glutCreateWindow("Classic F1 showroom");
 
   glutDisplayFunc(Render);
   glutKeyboardFunc(keyboardHandler);
@@ -235,14 +225,12 @@ void InitShaders()
   shaders[0].setInt("prefilterMap", 1);
   shaders[0].setInt("brdfLUT", 2);
 
-  // Generate a default texture because some meshes do not have one applied
+  // Generate a default texture to prevent visual glitches
   GLuint defaultTexture;
   glGenTextures(1, &defaultTexture);
   glBindTexture(GL_TEXTURE_2D, defaultTexture);
   unsigned char whitePixel[] = {255, 255, 255, 255};
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, whitePixel);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glActiveTexture(GL_TEXTURE10);
   glBindTexture(GL_TEXTURE_2D, defaultTexture);
 }
@@ -289,7 +277,7 @@ int main(int argc, char** argv)
 
   LoadModels();
 
-  maps = initIBL();
+  maps = initIBL("OBJs/room.hdr");
 
   // Main loop
   glutMainLoop();
