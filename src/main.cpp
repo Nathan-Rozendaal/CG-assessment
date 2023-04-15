@@ -276,9 +276,9 @@ void LoadModels()
   models.push_back(Model("OBJs/Room/Room.gltf"));
 
   models.push_back(Model("OBJs/Doors/door1.gltf"));
-  models[7].animationBehaviours.push_back(new XMovementBehaviour(2.3f));
+  models[7].animationBehaviours.push_back(new XMovementBehaviour(0.95f));
   models.push_back(Model("OBJs/Doors/door2.gltf"));
-  models[8].animationBehaviours.push_back(new XMovementBehaviour(4.6f));
+  models[8].animationBehaviours.push_back(new XMovementBehaviour(1.9f));
 }
 
 int main(int argc, char** argv)

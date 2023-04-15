@@ -2,6 +2,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+
+// Animation behaviour expects a mat4 transformation matrix as output
+// it is recommended to use an internal variable to keep track of how much time has passed
 class IAnimationBehaviour {
  public:
   virtual glm::mat4 animationStep(float delta) = 0;

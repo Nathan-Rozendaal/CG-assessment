@@ -34,6 +34,10 @@ class Model
   string directory;
   bool gammaCorrection;
 
+ private:
+  glm::mat4 animationModel;
+
+ public:
   // constructor, expects a filepath to a 3D model.
   Model(string const &path, bool gamma = false) : gammaCorrection(gamma)
   {
@@ -46,12 +50,13 @@ class Model
   void Draw(Shader &shader)
   {
     for(unsigned int i = 0; i < meshes.size(); i++)
-      meshes[i].Draw(shader, model);
+      meshes[i].Draw(shader, animationModel * model);
   }
 
   void AnimationStep(float delta) {
+    animationModel = glm::mat4();
     for (unsigned int i = 0; i < animationBehaviours.size(); i++)
-      model = animationBehaviours[i]->animationStep(delta) * model;
+      animationModel = animationBehaviours[i]->animationStep(delta) * animationModel;
   }
 
  private:
